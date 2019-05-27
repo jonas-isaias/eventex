@@ -1,0 +1,59 @@
+{%  load static %}
+
+<!DOCTYPE HTML>
+<html lang="en">\a
+	<head>
+		<title>Registro Ponto</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+		<meta name="description" content="O melhor sistema de registro de ponto" />
+		<link href="https://fonts.googleapis.com/css?family=Oswald:400,400italic,700,700italic%7COpen+Sans:300,300italic,700,700italic,400,400italic,900,900italic" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" href="{%static 'assets/main.css' %}" />
+		<noscript><link rel="stylesheet" href="{%static 'assets/noscript.css' %}" /></noscript>
+	</head>
+	<body class="is-loading">
+		<div id="wrapper">
+			<div id="main">
+				<div class="inner">
+					<h1 id="text02">O melhor sistema de registro de ponto</h1>
+					<hr id="divider02">
+					<p id="text01"><span>Ponto biométrico</span><br /><span>Marcações Mobile ( Android e IOS) e Web</span><br /><span>Tablet multiusuários</span><br /><span><strong>Um controle de ponto prático e dentro da lei!</strong></span><br /><span>Confira a Portaria nº 373 do <strong>Ministério do </span><br /><span>Trabalho</strong> e BAIXE o App.</span></p>
+					<ul id="icons01" class="icons">
+						<li>
+							<a class="n01" href="https://domain.ext/path">
+								<svg><use xlink:href="{%static 'assets/icons.svg#apple' %}"></use></svg>
+								<span class="label">Apple</span>
+							</a>
+						</li><li>
+							<a class="n02" href="https://play.google.com/store/apps/details?id=com.gelt.rpponto">
+								<svg><use xlink:href="{%static 'assets/icons.svg#android' %}"></use></svg>
+								<span class="label">Android</span>
+							</a>
+						</li><li>
+							<a class="n03" href="https://registroponto.com.br/Downloads/Portaria_373_2011.pdf">
+								<svg><use xlink:href="{%static 'assets/icons.svg#pdf' %}"></use></svg>
+								<span class="label">PDF Document</span>
+							</a>
+						</li>
+					</ul>
+					<p id="text03">Cobrimos qualquer oferta!</p>
+					<form enctype="multipart/form-data" id="form01" method="post" action="#">
+						<div class="inner">
+							<div class="field">
+								<input type="email" name="quero-saber-mais" id="form01-quero-saber-mais" placeholder="quero saber mais!" maxlength="128" required />
+							</div>
+							<div class="actions">
+								<button type="submit"><svg><use xlink:href="{%static 'assets/icons.svg#check' %}"></use></svg><span class="label">enviar!</span></button>
+							</div>
+						</div>
+						<input type="hidden" name="id" value="form01" />
+					</form>
+					<div id="image01" class="image">
+						<a href="https://registroponto.com.br/"><img src="{%static 'assets/images/image01.svg' %}" alt="" /></a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="{%static 'assets/main.js' %}"></script>
+	</body>
+</html>
