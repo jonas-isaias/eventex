@@ -137,6 +137,335 @@
 			}, 100);
 		});
 	
+	// Sections.
+		(function() {
+	
+			var initialSection, initialScrollPoint, initialId,
+				header, footer, name, hideHeader, hideFooter,
+				h, e, ee, k,
+				locked = false,
+				initialized = false,
+				doNext = function() {
+	
+					var section;
+	
+					section = $('#main > .inner > section.active').nextElementSibling;
+	
+					if (!section || section.tagName != 'SECTION')
+						return;
+	
+					location.href = '#' + section.id.replace(/-section$/, '');
+	
+				},
+				doPrevious = function() {
+	
+					var section;
+	
+					section = $('#main > .inner > section.active').previousElementSibling;
+	
+					if (!section || section.tagName != 'SECTION')
+						return;
+	
+					location.href = '#' + (section.matches(':first-child') ? '' : section.id.replace(/-section$/, ''));
+	
+				},
+				doScrollTop = function() {
+					scrollTo(0, 0);
+				},
+				doScroll = function(e, instant) {
+	
+					var pos;
+	
+					// Determine position.
+						switch (e.dataset.scrollBehavior ? e.dataset.scrollBehavior : 'default') {
+	
+							case 'default':
+							default:
+	
+								pos = e.offsetTop;
+	
+								break;
+	
+							case 'center':
+	
+								if (e.offsetHeight < window.innerHeight)
+									pos = e.offsetTop - ((window.innerHeight - e.offsetHeight) / 2);
+								else
+									pos = e.offsetTop;
+	
+								break;
+	
+							case 'previous':
+	
+								if (e.previousElementSibling)
+									pos = e.previousElementSibling.offsetTop + e.previousElementSibling.offsetHeight;
+								else
+									pos = e.offsetTop;
+	
+								break;
+	
+						}
+	
+					// Scroll.
+						if ('scrollBehavior' in $body.style
+						&&	initialized
+						&&	!instant)
+							scrollTo({
+								behavior: 'smooth',
+								left: 0,
+								top: pos
+							});
+						else
+							scrollTo(0, pos);
+	
+				},
+				sections = {};
+	
+			// Expose doNext, doPrevious.
+				window._next = doNext;
+				window._previous = doPrevious;
+	
+			// Initialize.
+	
+				// Set scroll restoration to manual.
+					if ('scrollRestoration' in history)
+						history.scrollRestoration = 'manual';
+	
+				// Header, footer.
+					header = $('#header');
+					footer = $('#footer');
+	
+				// Show initial section.
+	
+					// Determine target.
+						h = location.hash ? location.hash.substring(1) : null;
+	
+						if (h && !h.match(/^[a-zA-Z]/))
+							h = 'x' + h;
+	
+						// Scroll point.
+							if (e = $('[data-scroll-id="' + h + '"]')) {
+	
+								initialScrollPoint = e;
+								initialSection = initialScrollPoint.parentElement;
+								initialId = initialSection.id;
+	
+							}
+	
+						// Section.
+							else if (e = $('#' + (h ? h : 'home') + '-section')) {
+	
+								initialScrollPoint = null;
+								initialSection = e;
+								initialId = initialSection.id;
+	
+							}
+	
+					// Deactivate all sections (except initial).
+	
+						// Initially hide header and/or footer (if necessary).
+							name = (h ? h : 'home');
+							hideHeader = name ? ((name in sections) && ('hideHeader' in sections[name]) && sections[name].hideHeader) : false;
+							hideFooter = name ? ((name in sections) && ('hideFooter' in sections[name]) && sections[name].hideFooter) : false;
+	
+							// Header.
+								if (header && hideHeader) {
+	
+									header.classList.add('hidden');
+									header.style.display = 'none';
+	
+								}
+	
+							// Footer.
+								if (footer && hideFooter) {
+	
+									footer.classList.add('hidden');
+									footer.style.display = 'none';
+	
+								}
+	
+						// Deactivate.
+							ee = $$('#main > .inner > section:not([id="' + initialId + '"])');
+	
+							for (k = 0; k < ee.length; k++) {
+	
+								ee[k].className = 'inactive';
+								ee[k].style.display = 'none';
+	
+							}
+	
+					// Activate initial section.
+						initialSection.classList.add('active');
+	
+				 	// Scroll to top.
+				 		doScrollTop();
+	
+				// Load event.
+					on('load', function() {
+	
+						// Scroll to initial scroll point (if applicable).
+					 		if (initialScrollPoint)
+								doScroll(initialScrollPoint);
+	
+						// Mark as initialized.
+							initialized = true;
+	
+					});
+	
+			// Hashchange event.
+				on('hashchange', function(event) {
+	
+					var section, scrollPoint, id, sectionHeight, currentSection, currentSectionHeight,
+						name, hideHeader, hideFooter,
+						h, e, ee, k;
+	
+					// Lock.
+						if (locked)
+							return false;
+	
+					// Determine target.
+						h = location.hash ? location.hash.substring(1) : null;
+	
+						// Scroll point.
+							if (e = $('[data-scroll-id="' + h + '"]')) {
+	
+								scrollPoint = e;
+								section = scrollPoint.parentElement;
+								id = section.id;
+	
+							}
+	
+						// Section.
+							else if (e = $('#' + (h ? h : 'home') + '-section')) {
+	
+								scrollPoint = null;
+								section = e;
+								id = section.id;
+	
+							}
+	
+						// Bail.
+							else
+								return false;
+	
+					// No section? Bail.
+						if (!section)
+							return false;
+	
+					// Section already active?
+						if (!section.classList.contains('inactive')) {
+	
+						 	// Scroll to scroll point (if applicable).
+						 		if (scrollPoint)
+									doScroll(scrollPoint);
+	
+							// Otherwise, just scroll to top.
+								else
+								 	doScrollTop();
+	
+							// Bail.
+								return false;
+	
+						}
+	
+					// Otherwise, activate it.
+						else {
+	
+							// Lock.
+								locked = true;
+	
+							// Clear index URL hash.
+								if (location.hash == '#home')
+									history.replaceState(null, null, '#');
+	
+							// Deactivate current section.
+								currentSection = $('section:not(.inactive)');
+	
+								if (currentSection) {
+	
+									// Deactivate.
+										currentSection.classList.add('inactive');
+	
+									// Hide.
+										setTimeout(function() {
+											currentSection.style.display = 'none';
+											currentSection.classList.remove('active');
+										}, 250);
+	
+								}
+	
+							// Activate target section.
+								setTimeout(function() {
+	
+									// Show.
+										section.style.display = '';
+	
+									// Trigger 'resize' event.
+										trigger('resize');
+	
+									// Scroll to top.
+										doScrollTop();
+	
+									// Delay.
+										setTimeout(function() {
+	
+											// Activate.
+												section.classList.remove('inactive');
+												section.classList.add('active');
+	
+											// Delay.
+												setTimeout(function() {
+	
+												 	// Scroll to scroll point (if applicable).
+												 		if (scrollPoint)
+															doScroll(scrollPoint, true);
+	
+													// Unlock.
+														locked = false;
+	
+												}, 500);
+	
+										}, 75);
+	
+								}, 250);
+	
+						}
+	
+					return false;
+	
+				});
+	
+				// Hack: Allow hashchange to trigger on click even if the target's href matches the current hash.
+					on('click', function(event) {
+	
+						var t = event.target;
+	
+						// Target is an image and its parent is a link? Switch target to parent.
+							if (t.tagName == 'IMG'
+							&&	t.parentElement
+							&&	t.parentElement.tagName == 'A')
+								t = t.parentElement;
+	
+						// Target is an anchor *and* its href is a hash that matches the current hash?
+							if (t.tagName == 'A'
+							&&	t.getAttribute('href').substr(0, 1) == '#'
+							&&	t.hash == window.location.hash) {
+	
+								// Prevent default.
+									event.preventDefault();
+	
+								// Replace state with '#'.
+									history.replaceState(undefined, undefined, '#');
+	
+								// Replace location with target hash.
+									location.replace(t.hash);
+	
+							}
+	
+					});
+	
+		})();
+	
 	// Browser hacks.
 	
 		// Init.
@@ -509,5 +838,114 @@
 					})();
 	
 			}
+	
+	// Deferred.
+		(function() {
+	
+			var items = $$('.deferred'),
+				f;
+	
+			// Polyfill: NodeList.forEach()
+				if (!('forEach' in NodeList.prototype))
+					NodeList.prototype.forEach = Array.prototype.forEach;
+	
+			// Initialize items.
+				items.forEach(function(p) {
+	
+					var i = p.firstElementChild;
+	
+					// Set parent to placeholder.
+						p.style.backgroundImage = 'url(' + i.src + ')';
+						p.style.backgroundSize = '100% 100%';
+						p.style.backgroundPosition = 'top left';
+						p.style.backgroundRepeat = 'no-repeat';
+	
+					// Hide image.
+						i.style.opacity = 0;
+						i.style.transition = 'opacity 0.375s ease-in-out';
+	
+					// Load event.
+						i.addEventListener('load', function(event) {
+	
+							// Not "done" yet? Bail.
+								if (i.dataset.src !== 'done')
+									return;
+	
+							// Show image.
+								if (Date.now() - i._startLoad < 375) {
+	
+									p.classList.remove('loading');
+									p.style.backgroundImage = 'none';
+									i.style.transition = '';
+									i.style.opacity = 1;
+	
+								}
+								else {
+	
+									p.classList.remove('loading');
+									i.style.opacity = 1;
+	
+									setTimeout(function() {
+										p.style.backgroundImage = 'none';
+									}, 375);
+	
+								}
+	
+						});
+	
+				});
+	
+			// Handler function.
+				f = function() {
+	
+					var	height = document.documentElement.clientHeight,
+						top = (client.os == 'ios' ? document.body.scrollTop : document.documentElement.scrollTop),
+						bottom = top + height;
+	
+					// Step through items.
+						items.forEach(function(p) {
+	
+							var i = p.firstElementChild;
+	
+							// Not visible? Bail.
+								if (i.offsetParent === null)
+									return true;
+	
+							// "Done" already? Bail.
+								if (i.dataset.src === 'done')
+									return true;
+	
+							// Get image position.
+								var	x = i.getBoundingClientRect(),
+									imageTop = top + Math.floor(x.top) - height,
+									imageBottom = top + Math.ceil(x.bottom) + height,
+									src;
+	
+							// Falls within viewable area of viewport?
+								if (imageTop <= bottom && imageBottom >= top) {
+	
+									// Get src, mark as "done".
+										src = i.dataset.src;
+										i.dataset.src = 'done';
+	
+									// Mark parent as loading.
+										p.classList.add('loading');
+	
+									// Swap placeholder for real image src.
+										i._startLoad = Date.now();
+										i.src = src;
+	
+								}
+	
+						});
+	
+				};
+	
+			// Add event listeners.
+				on('load', f);
+				on('resize', f);
+				on('scroll', f);
+	
+		})();
 
 })();
